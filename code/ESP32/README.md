@@ -1,2 +1,3 @@
 # ESP32
-1. Simple RTOS
+1. I2C
+2. SPI
