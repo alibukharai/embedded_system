@@ -1,3 +1,3 @@
 # ESP32
 1. I2C
-2. SPI
+2. [SPI](./SPI/)
