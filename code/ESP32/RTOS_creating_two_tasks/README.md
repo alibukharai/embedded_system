@@ -1,6 +1,5 @@
 # RTOS Creating Two Tasks
 
-T
 
 ## Output
 

@@ -1,3 +1,4 @@
+
 /*
  * SPDX-FileCopyrightText: 2023-2024 Espressif Systems (Shanghai) CO LTD
  *
@@ -8,7 +9,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <string.h>
-#include <stdbool.h>
+#include <stdbool.h> // Include this for 'bool' type
 
 #include "esp_log.h"
 #include "math.h"
@@ -21,6 +22,7 @@
 spi_device_handle_t spi_device;
 
 static const char *TAG = "MT6701Sensor";
+// static const float ALPHA = 0.4;
 
 /* Constants for CRC calculation */
 static uint8_t tableCRC6[64] = {
@@ -90,13 +92,12 @@ void sensor_mt6701_init(int GPIO_SCLK, int GPIO_MISO, int GPIO_MOSI, int GPIO_CS
 float sensor_mt7601_getAngle()
 {
     esp_err_t ret;
-    static float angle = 0.0;
+    static float current_angle = 0.0;
     static float previous_angle = 0.0; 
+    static float angle = 0.0;
 
     uint64_t now = esp_timer_get_time(); 
-    static uint64_t last_update = 0;
 
-    if (now - last_update > 1) {
         spi_transaction_t spi_transaction = {
             .flags = SPI_TRANS_USE_RXDATA,
             .length = 24,
@@ -113,17 +114,24 @@ float sensor_mt7601_getAngle()
 
         uint32_t spi_32 = ((int32_t)spi_transaction.rx_data[0] << 16) | ((int32_t)spi_transaction.rx_data[1] << 8) | spi_transaction.rx_data[2];
         uint32_t angle_spi = spi_32 >> 10;
+
+        // uint8_t field_status = (spi_32 >> 6) & 0x3;
+        // uint8_t push_status = (spi_32 >> 8) & 0x1;
+        // uint8_t loss_status = (spi_32 >> 9) & 0x1;
         uint8_t received_crc = spi_32 & 0x3F;
         uint8_t calculated_crc = CRC6_43_18bit(spi_32 >> 6);
 
         if (received_crc == calculated_crc) {
-            angle = (float)angle_spi * 2 * M_PI / 16384;
-            previous_angle = angle;            
-            last_update = now;
-        } else {
-            return previous_angle;
+            current_angle = (float)angle_spi * 2 * M_PI / 16384;
+            if(current_angle-previous_angle > 0){
+                angle = current_angle;
+                } else {
+                angle = -current_angle;
+                }
+// printf("current_angle: %f ; previous_angle: %f ; angle: %f \n",current_angle, previous_angle,angle);
+            previous_angle = current_angle;
+        } else{
+            return angle;
         }
-    }
-    ESP_LOGD(TAG, "Angle in Radians: %f", angle);
     return angle;
 }

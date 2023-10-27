@@ -152,7 +152,8 @@ static esp_err_t i2c_slave_init(void)
     }
     err = i2c_driver_install(i2c_slave_port, conf_slave.mode, I2C_SLAVE_RX_BUF_LEN, I2C_SLAVE_TX_BUF_LEN, 0);
     i2c_dev_t *hw = (i2c_dev_t *)I2C_LL_GET_HW(0);
-    hw->scl_stretch_conf.slave_scl_stretch_en = 0;
+    hw->scl_stretch_conf.slave_scl_stretch_en = 1;
+    hw->scl_stretch_conf.stretch_protect_num = 10;
     return err;
 }
 

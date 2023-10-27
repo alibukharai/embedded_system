@@ -25,7 +25,7 @@ void app_main()
         float angle = sensor_mt7601_getAngle();
 
         // Log the angle value using ESP_LOG
-        ESP_LOGI(TAG, "Current Shaft Angle: %f radians", angle);
+        ESP_LOGD(TAG, "Current Shaft Angle: %f radians", angle);
 
         // Add a delay or perform other tasks as needed
         vTaskDelay(1000 / portTICK_RATE_MS);
